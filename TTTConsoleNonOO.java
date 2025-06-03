@@ -64,11 +64,10 @@ public class TTTConsoleNonOO {
                 if (ans == 'N' ||  ans == 'n') {
                     System.out.println("Bye!");
                     System.exit(0); // terminate the program
-                    break;
                 } else if (ans == 'y' || ans == 'Y'){
                     break;
                 } else {
-                    System.out.println("invalid");
+                    System.out.println("Invalid input, please type in y or n");
                 }
             }
         } while (true); // repeat until user did not answer yes
