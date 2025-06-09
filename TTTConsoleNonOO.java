@@ -62,7 +62,7 @@ public class TTTConsoleNonOO {
                 System.out.print("Play again (y/n)? ");
                 char ans = in.next().charAt(0);
                 if (ans == 'N' ||  ans == 'n') {
-                    System.out.println("Bye!");
+                    System.out.println("Good Bye!");
                     System.exit(0); // terminate the program
                 } else if (ans == 'y' || ans == 'Y'){
                     break;
