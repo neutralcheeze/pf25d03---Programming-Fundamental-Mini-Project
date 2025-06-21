@@ -11,6 +11,11 @@ public class TTTGraphics extends JFrame {
    public static final int ROWS = 3;  // ROWS x COLS cells
    public static final int COLS = 3;
 
+   // menyimpan value untuk garis kemenangan
+   private int winRow1 = -1; // koordinat garis kemenangan
+   private int winCol1 = -1;
+   private int winRow2 = -1;
+   private int winCol2 = -1;
    // Define named constants for the drawing graphics
    public static final int CELL_SIZE = 120; // cell width/height (square)
    public static final int BOARD_WIDTH  = CELL_SIZE * COLS; // the drawing canvas
@@ -68,7 +73,7 @@ public class TTTGraphics extends JFrame {
 
             if (currentState == State.PLAYING) {
                if (row >= 0 && row < ROWS && col >= 0
-                     && col < COLS && board[row][col] == Seed.NO_SEED) {
+                       && col < COLS && board[row][col] == Seed.NO_SEED) {
                   // Update board[][] and return the new game state after the move
                   currentState = stepGame(currentPlayer, row, col);
                   // Switch player
@@ -124,37 +129,51 @@ public class TTTGraphics extends JFrame {
     *  Update cells[selectedRow][selectedCol]. Compute and return the
     *  new game state (PLAYING, DRAW, CROSS_WON, NOUGHT_WON).
     */
-   public State stepGame(Seed player, int selectedRow, int selectedCol) {
-      // Update game board
-      board[selectedRow][selectedCol] = player;
 
-      // Compute and return the new game state
-      if (board[selectedRow][0] == player  // 3-in-the-row
-                && board[selectedRow][1] == player
-                && board[selectedRow][2] == player
-             || board[0][selectedCol] == player // 3-in-the-column
-                && board[1][selectedCol] == player
-                && board[2][selectedCol] == player
-             || selectedRow == selectedCol  // 3-in-the-diagonal
-                && board[0][0] == player
-                && board[1][1] == player
-                && board[2][2] == player
-             || selectedRow + selectedCol == 2 // 3-in-the-opposite-diagonal
-                && board[0][2] == player
-                && board[1][1] == player
-                && board[2][0] == player) {
+   public State stepGame(Seed player, int selectedRow, int selectedCol) {
+      board[selectedRow][selectedCol] = player;
+      // Untuk cek horizontal dan menyimpan garis kemangan
+      if (board[selectedRow][0] == player && board[selectedRow][1] == player && board[selectedRow][2] == player) {
+         winRow1 = selectedRow;
+         winRow2 = selectedRow;
+         winCol1 = 0;
+         winCol2 = 2;
          return (player == Seed.CROSS) ? State.CROSS_WON : State.NOUGHT_WON;
-      } else {
-         // Nobody win. Check for DRAW (all cells occupied) or PLAYING.
-         for (int row = 0; row < ROWS; ++row) {
-            for (int col = 0; col < COLS; ++col) {
-               if (board[row][col] == Seed.NO_SEED) {
-                  return State.PLAYING; // still have empty cells
-               }
+      }
+      // Untuk cek vertikal dan menyimpan garis kemenangan
+      if (board[0][selectedCol] == player && board[1][selectedCol] == player && board[2][selectedCol] == player) {
+         winCol1 = selectedCol;
+         winCol2 = selectedCol;
+         winRow1 = 0;
+         winRow2 = 2;
+         return (player == Seed.CROSS) ? State.CROSS_WON : State.NOUGHT_WON;
+      }
+      // Untuk cek diagonal dan menyimpan garis kemanangan
+      if (selectedRow == selectedCol && board[0][0] == player && board[1][1] == player && board[2][2] == player) {
+         winRow1 = 0;
+         winCol1 = 0;
+         winRow2 = 2;
+         winCol2 = 2;
+         return (player == Seed.CROSS) ? State.CROSS_WON : State.NOUGHT_WON;
+      }
+      // Untuk cek anti-diagonal dan menyimpan garis kemeangan
+      if (selectedRow + selectedCol == 2 && board[0][2] == player && board[1][1] == player && board[2][0] == player) {
+         winRow1 = 0;
+         winCol1 = 2;
+         winRow2 = 2;
+         winCol2 = 0;
+         return (player == Seed.CROSS) ? State.CROSS_WON : State.NOUGHT_WON;
+      }
+
+      // Cek DRAW
+      for (int row = 0; row < ROWS; ++row) {
+         for (int col = 0; col < COLS; ++col) {
+            if (board[row][col] == Seed.NO_SEED) {
+               return State.PLAYING;
             }
          }
-         return State.DRAW; // no empty cell, it's a draw
       }
+      return State.DRAW;
    }
 
    /**
@@ -172,18 +191,18 @@ public class TTTGraphics extends JFrame {
          g.setColor(COLOR_GRID);
          for (int row = 1; row < ROWS; ++row) {
             g.fillRoundRect(0, CELL_SIZE * row - GRID_WIDTH_HALF,
-                  BOARD_WIDTH-1, GRID_WIDTH, GRID_WIDTH, GRID_WIDTH);
+                    BOARD_WIDTH-1, GRID_WIDTH, GRID_WIDTH, GRID_WIDTH);
          }
          for (int col = 1; col < COLS; ++col) {
             g.fillRoundRect(CELL_SIZE * col - GRID_WIDTH_HALF, 0,
-                  GRID_WIDTH, BOARD_HEIGHT-1, GRID_WIDTH, GRID_WIDTH);
+                    GRID_WIDTH, BOARD_HEIGHT-1, GRID_WIDTH, GRID_WIDTH);
          }
 
          // Draw the Seeds of all the cells if they are not empty
          // Use Graphics2D which allows us to set the pen's stroke
          Graphics2D g2d = (Graphics2D)g;
          g2d.setStroke(new BasicStroke(SYMBOL_STROKE_WIDTH,
-               BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                 BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
          for (int row = 0; row < ROWS; ++row) {
             for (int col = 0; col < COLS; ++col) {
                int x1 = col * CELL_SIZE + CELL_PADDING;
@@ -199,6 +218,20 @@ public class TTTGraphics extends JFrame {
                   g2d.drawOval(x1, y1, SYMBOL_SIZE, SYMBOL_SIZE);
                }
             }
+            if (currentState == State.CROSS_WON || currentState == State.NOUGHT_WON) {
+               String winnerText = (currentState == State.CROSS_WON) ? "Winner: X" : "Winner: O";
+               g2d.setColor(Color.GREEN.darker());
+               g2d.setFont(new Font("Arial", Font.BOLD, 28));
+               g2d.drawString(winnerText, BOARD_WIDTH / 2 - 70, 30); // menambah teks di tengah atas
+               g2d.setColor(Color.GREEN); // nambah garis kemenangan hijau
+               g2d.setStroke(new BasicStroke(6));
+               int gx1 = winCol1 * CELL_SIZE + CELL_SIZE / 2;
+               int gy1 = winRow1 * CELL_SIZE + CELL_SIZE / 2;
+               int gx2 = winCol2 * CELL_SIZE + CELL_SIZE / 2;
+               int gy2 = winRow2 * CELL_SIZE + CELL_SIZE / 2;
+               g2d.drawLine(gx1, gy1, gx2, gy2);
+            }
+
          }
 
          // Print status message
