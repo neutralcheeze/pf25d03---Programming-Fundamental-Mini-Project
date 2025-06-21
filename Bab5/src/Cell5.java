@@ -1,3 +1,5 @@
+package Bab5.src;
+
 import java.awt.*;
 /**
  * The Cell class models each individual cell of the game board.
