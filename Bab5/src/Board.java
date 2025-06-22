@@ -136,17 +136,12 @@ public class Board {
         }
         if (winRow1 != -1 && winCol1 != -1 && winRow2 != -1 && winCol2 != -1) {
             g.setColor(Color.GREEN.darker());
-
             int x1 = winCol1 * Cell.SIZE + Cell.SIZE / 2;
             int y1 = winRow1 * Cell.SIZE + Cell.SIZE / 2;
             int x2 = winCol2 * Cell.SIZE + Cell.SIZE / 2;
             int y2 = winRow2 * Cell.SIZE + Cell.SIZE / 2;
-
-            // gambar garis tebal dengan menggambar beberapa garis paralel
-            for (int i = -2; i <= 2; i++) {
-                g.drawLine(x1 + i, y1, x2 + i, y2); // Ketebalan horizontal
-                g.drawLine(x1, y1 + i, x2, y2 + i); // Ketebalan vertikal
-            }
+            g.drawLine(x1 , y1, x2, y2);
+            g.drawLine(x1, y1 , x2, y2);
         }
     }
 }
