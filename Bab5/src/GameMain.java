@@ -20,6 +20,9 @@ public class GameMain extends JPanel {
     public static final Font FONT_STATUS = new Font("OCR A Extended", Font.PLAIN, 14);
 
     // Define game objects
+
+    // GameMode
+    private GameMode mode;
     private Board board;         // the game board
     private State currentState;  // the current state of the game
     private Seed currentPlayer;  // the current player
@@ -29,7 +32,10 @@ public class GameMain extends JPanel {
     private JLabel statusBar;    // for displaying status message
 
     /** Constructor to setup the UI and game components */
-    public GameMain() {
+    public GameMain(GameMode mode) {
+
+        this.mode = mode;
+        initGame();
 
         // This JPanel fires MouseEvent
         super.addMouseListener(new MouseAdapter() {
@@ -45,19 +51,24 @@ public class GameMain extends JPanel {
                     if (row >= 0 && row < Board.ROWS && col >= 0 && col < Board.COLS
                             && board.cells[row][col].content == Seed.NO_SEED) {
 
-                        if (currentPlayer == playerSeed) {
-                            // Update cells[][] and return the new game state after the move
-                            currentState = board.stepGame(playerSeed, row, col);
+                        if (mode == GameMode.PVB) {
+                            if (currentPlayer == playerSeed) {
+                                // Update cells[][] and return the new game state after the move
+                                currentState = board.stepGame(playerSeed, row, col);
 
-                            if (currentState == State.PLAYING) {
-                                botMove();
-                                currentPlayer = playerSeed;
+                                if (currentState == State.PLAYING) {
+                                    botMove();
+                                    currentPlayer = playerSeed;
+                                }
                             }
-
+                        } else if (mode == GameMode.PVP) {
+                            // Switch player
+                            currentState = board.stepGame(currentPlayer, row, col);
+                            if (currentState == State.PLAYING) {
+                                currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
+                            }
                         }
 
-                        // Switch player
-//                        currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
                     }
 
                 } else {        // game over
@@ -111,6 +122,12 @@ public class GameMain extends JPanel {
 
     /** Initialize the game (run once) */
     public void initGame() {
+//        JFrame frame = new JFrame("Tic-Tac-Toe");
+//        frame.setContentPane(this);
+//        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//        frame.setSize(Board.CANVAS_WIDTH, Board.CANVAS_HEIGHT);
+//        frame.setLocationRelativeTo(null);
+//        frame.setVisible(true);
         board = new Board();  // allocate the game-board
     }
 
@@ -122,29 +139,37 @@ public class GameMain extends JPanel {
                 board.cells[row][col].content = Seed.NO_SEED; // all cells empty
             }
         }
-        currentPlayer = Seed.CROSS;    // cross plays first
+
         currentState = State.PLAYING;  // ready to play
 
-        // Random seed CROSS or NOUGHT
-        boolean isPlayerCross = new Random().nextBoolean();
+        // PVB Game Mode
+        if (mode == GameMode.PVB) {
+            // Random seed CROSS or NOUGHT
+            boolean isPlayerCross = new Random().nextBoolean();
 
-        // Assign playerSeed and botSeed to random seed
-        if (isPlayerCross) {
-            playerSeed = Seed.CROSS;
-            botSeed = Seed.NOUGHT;
-        } else {
-            playerSeed = Seed.NOUGHT;
-            botSeed = Seed.CROSS;
+            // Assign playerSeed and botSeed to random seed
+            if (isPlayerCross) {
+                playerSeed = Seed.CROSS;
+                botSeed = Seed.NOUGHT;
+            } else {
+                playerSeed = Seed.NOUGHT;
+                botSeed = Seed.CROSS;
+            }
+
+            // First init for current player, first always CROSS
+            currentPlayer = Seed.CROSS;
+
+            // Check if botseed is cross, bot will move first and set currentPlayer to playerSeed(NOUGHT)
+            if (botSeed == Seed.CROSS) {
+                botMove();
+                currentPlayer = playerSeed;
+            } else {
+                currentPlayer = playerSeed;
+            }
+        } else if (mode == GameMode.PVP) {
+            currentPlayer = Seed.CROSS;    // cross plays first
         }
 
-        // First init for current player, first always CROSS
-        currentPlayer = Seed.CROSS;
-
-        // Check if botseed is cross, bot will move first and set currentPlayer to playerSeed(NOUGHT)
-        if (botSeed == Seed.CROSS) {
-            botMove();
-            currentPlayer = playerSeed;
-        }
 
         System.out.println(botSeed);
 

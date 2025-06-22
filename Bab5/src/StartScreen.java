@@ -22,10 +22,12 @@ public class StartScreen extends JFrame {
 
         pvpButton.addActionListener(e -> {
             System.out.println("PVP MODE");
+            launchGame(GameMode.PVP);
         });
 
         pvbButton.addActionListener(e -> {
             System.out.println("PVB MODE");
+            launchGame(GameMode.PVB);
         });
 
         leaderboardButton.addActionListener(e -> {
@@ -42,5 +44,18 @@ public class StartScreen extends JFrame {
         add(panel);
         setVisible(true);
 
+
     }
+
+    private void launchGame(GameMode mode) {
+        JFrame gameFrame = new JFrame("Tic-Tac-Toe");
+        gameFrame.setContentPane(new GameMain(mode));
+        gameFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        gameFrame.pack();
+        gameFrame.setLocationRelativeTo(null);
+        gameFrame.setVisible(true);
+
+        this.dispose();
+    }
+
 }
