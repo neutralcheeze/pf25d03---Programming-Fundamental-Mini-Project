@@ -2,6 +2,7 @@ package Bab5.src;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Random;
 import javax.swing.*;
 /**
  * Tic-Tac-Toe: Two-player Graphic version with better OO design.
@@ -22,6 +23,9 @@ public class GameMain extends JPanel {
     private Board board;         // the game board
     private State currentState;  // the current state of the game
     private Seed currentPlayer;  // the current player
+
+    private Seed playerSeed;
+    private Seed botSeed;
     private JLabel statusBar;    // for displaying status message
 
     /** Constructor to setup the UI and game components */
@@ -38,13 +42,22 @@ public class GameMain extends JPanel {
                 int col = mouseX / Cell.SIZE;
 
                 if (currentState == State.PLAYING) {
-
                     if (row >= 0 && row < Board.ROWS && col >= 0 && col < Board.COLS
                             && board.cells[row][col].content == Seed.NO_SEED) {
-                        // Update cells[][] and return the new game state after the move
-                        currentState = board.stepGame(currentPlayer, row, col);
+
+                        if (currentPlayer == playerSeed) {
+                            // Update cells[][] and return the new game state after the move
+                            currentState = board.stepGame(playerSeed, row, col);
+
+                            if (currentState == State.PLAYING) {
+                                botMove();
+                                currentPlayer = playerSeed;
+                            }
+
+                        }
+
                         // Switch player
-                        currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
+//                        currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
                     }
 
                 } else {        // game over
@@ -75,6 +88,27 @@ public class GameMain extends JPanel {
         newGame();
     }
 
+    private void botMove() {
+        // Check is current state still playing after player's turn?
+        Random random = new Random();
+        if (currentState == State.PLAYING) {
+            // Loop until bot's row and col in empty seed
+            while (true) {
+
+                // set bot's row and col with random number (0 - 2)
+                int botRow = random.nextInt(Board.ROWS);
+                int botCol = random.nextInt(Board.COLS);
+
+                // Exit loop if bot's row and col in empty seed
+                if (board.cells[botRow][botCol].content == Seed.NO_SEED) {
+                    currentState = board.stepGame(botSeed, botRow, botCol);
+                    repaint();
+                    break;
+                }
+            }
+        }
+    }
+
     /** Initialize the game (run once) */
     public void initGame() {
         board = new Board();  // allocate the game-board
@@ -82,6 +116,7 @@ public class GameMain extends JPanel {
 
     /** Reset the game-board contents and the current-state, ready for new game */
     public void newGame() {
+        board.newGame();
         for (int row = 0; row < Board.ROWS; ++row) {
             for (int col = 0; col < Board.COLS; ++col) {
                 board.cells[row][col].content = Seed.NO_SEED; // all cells empty
@@ -89,7 +124,32 @@ public class GameMain extends JPanel {
         }
         currentPlayer = Seed.CROSS;    // cross plays first
         currentState = State.PLAYING;  // ready to play
-        board.newGame(); //menghapus garis sebelumnya dari newgame board
+
+        // Random seed CROSS or NOUGHT
+        boolean isPlayerCross = new Random().nextBoolean();
+
+        // Assign playerSeed and botSeed to random seed
+        if (isPlayerCross) {
+            playerSeed = Seed.CROSS;
+            botSeed = Seed.NOUGHT;
+        } else {
+            playerSeed = Seed.NOUGHT;
+            botSeed = Seed.CROSS;
+        }
+
+        // First init for current player, first always CROSS
+        currentPlayer = Seed.CROSS;
+
+        // Check if botseed is cross, bot will move first and set currentPlayer to playerSeed(NOUGHT)
+        if (botSeed == Seed.CROSS) {
+            botMove();
+            currentPlayer = playerSeed;
+        }
+
+        System.out.println(botSeed);
+
+        // update
+        repaint();
     }
 
     /** Custom painting codes on this JPanel */
