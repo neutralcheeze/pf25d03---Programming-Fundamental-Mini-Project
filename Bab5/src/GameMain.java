@@ -38,6 +38,7 @@ public class GameMain extends JPanel {
                 int col = mouseX / Cell.SIZE;
 
                 if (currentState == State.PLAYING) {
+
                     if (row >= 0 && row < Board.ROWS && col >= 0 && col < Board.COLS
                             && board.cells[row][col].content == Seed.NO_SEED) {
                         // Update cells[][] and return the new game state after the move
@@ -88,6 +89,7 @@ public class GameMain extends JPanel {
         }
         currentPlayer = Seed.CROSS;    // cross plays first
         currentState = State.PLAYING;  // ready to play
+        board.newGame(); //menghapus garis sebelumnya dari newgame board
     }
 
     /** Custom painting codes on this JPanel */
