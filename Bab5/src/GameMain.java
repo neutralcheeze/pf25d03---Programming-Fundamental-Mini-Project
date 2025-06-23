@@ -12,6 +12,7 @@ public class GameMain extends JPanel {
     private static final long serialVersionUID = 1L; // to prevent serializable warning
 
     // Define named constants for the drawing graphics
+
     public static final String TITLE = "Tic Tac Toe";
     public static final Color COLOR_BG = Color.WHITE;
     public static final Color COLOR_BG_STATUS = new Color(216, 216, 216);
@@ -82,6 +83,8 @@ public class GameMain extends JPanel {
                 // Refresh the drawing canvas
                 repaint();  // Callback paintComponent().
                 updateScore(); //update skor
+
+
             }
         });
 
@@ -136,6 +139,7 @@ public class GameMain extends JPanel {
 //        frame.setLocationRelativeTo(null);
 //        frame.setVisible(true);
         board = new Board();  // allocate the game-board
+
     }
 
     /** Reset the game-board contents and the current-state, ready for new game */
@@ -196,7 +200,7 @@ public class GameMain extends JPanel {
         // Print status-bar message BO3
         if (currentState == State.PLAYING) { //saat bermain
             statusBar.setForeground(Color.BLACK);
-            statusBar.setText("Round " + (roundsPlayed + 1) + "  |  X'Score " + crossWins + " – " + noughtWins + " O's Score" + "  |  " + ((currentPlayer == Seed.CROSS) ? "X's Turn" : "O's Turn"));
+            statusBar.setText("Round " + (roundsPlayed + 1) + "  |  X's Score " + crossWins + " – " + noughtWins + " O's Score" + "  |  " + ((currentPlayer == Seed.CROSS) ? "X's Turn" : "O's Turn"));
         } else if (currentState == State.DRAW) { //saat draw
             statusBar.setForeground(Color.RED);
             statusBar.setText("It's a Draw! Click to play again.(X's Score  " + crossWins + " – " + noughtWins + " O's Score)");
@@ -217,7 +221,15 @@ public class GameMain extends JPanel {
     }
     private void updateScore() {
         if (roundScored || currentState == State.PLAYING) return;   // sudah dihitung
-
+        String roundWinnerMessage = "";
+        if(currentState == State.CROSS_WON){
+             roundWinnerMessage = "X is the winner of this round";
+        }else if(currentState == State.NOUGHT_WON){
+             roundWinnerMessage  = "O is the winner of this round";
+        }
+        else{
+             roundWinnerMessage = "It is a Draw";
+        }
         if (currentState == State.CROSS_WON) {
             crossWins++;
         } else if (currentState == State.NOUGHT_WON) {
@@ -225,6 +237,9 @@ public class GameMain extends JPanel {
         }
         roundsPlayed++;
         roundScored = true;
+
+        JOptionPane.showMessageDialog(this, roundWinnerMessage, "Winner of round " + roundsPlayed,
+                JOptionPane.INFORMATION_MESSAGE);
 
         // Cek apakah sudah ada juara Bo3
         if (crossWins == ROUNDS_TO_WIN || noughtWins == ROUNDS_TO_WIN) {
