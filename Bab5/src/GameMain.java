@@ -18,7 +18,12 @@ public class GameMain extends JPanel {
     public static final Color COLOR_CROSS = new Color(239, 105, 80);  // Red #EF6950
     public static final Color COLOR_NOUGHT = new Color(64, 154, 225); // Blue #409AE1
     public static final Font FONT_STATUS = new Font("OCR A Extended", Font.PLAIN, 14);
-
+    //Round untuk game
+    private int crossWins   = 0;   // jumlah kemenangan X
+    private int noughtWins  = 0;   // jumlah kemenangan O
+    private int roundsPlayed = 0;  // berapa ronde telah selesai
+    private final int ROUNDS_TO_WIN = 2;   //butuh 2 kemenangan
+    private boolean roundScored = false;   // agar skor 1 ronde tidak terhitung dua kali
     // Define game objects
 
     // GameMode
@@ -76,6 +81,7 @@ public class GameMain extends JPanel {
                 }
                 // Refresh the drawing canvas
                 repaint();  // Callback paintComponent().
+                updateScore(); //update skor
             }
         });
 
@@ -113,6 +119,7 @@ public class GameMain extends JPanel {
                 // Exit loop if bot's row and col in empty seed
                 if (board.cells[botRow][botCol].content == Seed.NO_SEED) {
                     currentState = board.stepGame(botSeed, botRow, botCol);
+                    updateScore(); //mengupdate skor permainan setelah bot jalan
                     repaint();
                     break;
                 }
@@ -141,6 +148,7 @@ public class GameMain extends JPanel {
         }
 
         currentState = State.PLAYING;  // ready to play
+        roundScored = false; //untuk reset ronde berikutnya
 
         // PVB Game Mode
         if (mode == GameMode.PVB) {
@@ -185,22 +193,49 @@ public class GameMain extends JPanel {
 
         board.paint(g);  // ask the game board to paint itself
 
-        // Print status-bar message
-        if (currentState == State.PLAYING) {
+        // Print status-bar message BO3
+        if (currentState == State.PLAYING) { //saat bermain
             statusBar.setForeground(Color.BLACK);
-            statusBar.setText((currentPlayer == Seed.CROSS) ? "X's Turn" : "O's Turn");
-        } else if (currentState == State.DRAW) {
+            statusBar.setText("Round " + (roundsPlayed + 1) + "  |  X'Score " + crossWins + " – " + noughtWins + " O's Score" + "  |  " + ((currentPlayer == Seed.CROSS) ? "X's Turn" : "O's Turn"));
+        } else if (currentState == State.DRAW) { //saat draw
             statusBar.setForeground(Color.RED);
-            statusBar.setText("It's a Draw! Click to play again.");
-        } else if (currentState == State.CROSS_WON) {
+            statusBar.setText("It's a Draw! Click to play again.(X's Score  " + crossWins + " – " + noughtWins + " O's Score)");
+        } else if (currentState == State.CROSS_WON) { //saat X menang
             statusBar.setForeground(Color.RED);
-            statusBar.setText("'X' Won! Click to play again.");
-        } else if (currentState == State.NOUGHT_WON) {
+            statusBar.setText("'X' Won! Click to play again. (X's Score " + crossWins + " – " + noughtWins + " O's Score)");
+        } else if (currentState == State.NOUGHT_WON) { // saat O menang
             statusBar.setForeground(Color.RED);
-            statusBar.setText("'O' Won! Click to play again.");
+            statusBar.setText("'O' Won! Click to play again. X's Score  " + crossWins + " – " + noughtWins + " O's Score)");
         }
     }
+    private void resetMatch() {
+        crossWins= 0;
+        noughtWins = 0;
+        roundsPlayed =0;
+        roundScored = false;
+        newGame();          // mulai ronde pertama lagi
+    }
+    private void updateScore() {
+        if (roundScored || currentState == State.PLAYING) return;   // sudah dihitung
 
+        if (currentState == State.CROSS_WON) {
+            crossWins++;
+        } else if (currentState == State.NOUGHT_WON) {
+            noughtWins++;
+        }
+        roundsPlayed++;
+        roundScored = true;
+
+        // Cek apakah sudah ada juara Bo3
+        if (crossWins == ROUNDS_TO_WIN || noughtWins == ROUNDS_TO_WIN) {
+            String champ = (crossWins == ROUNDS_TO_WIN) ? "X" : "O";
+            JOptionPane.showMessageDialog(this, champ + " Won! " +
+                            "Final Score: X " + crossWins + " – " + noughtWins + " O", "Match Finished",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+            resetMatch();       // mulai BO3 baru
+        }
+    }
     /** The entry "main" method */
     public static void main(String[] args) {
         // Run GUI construction codes in Event-Dispatching thread for thread safety
