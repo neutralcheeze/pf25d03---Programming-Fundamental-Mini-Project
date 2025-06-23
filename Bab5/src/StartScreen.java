@@ -21,8 +21,13 @@ public class StartScreen extends JFrame {
         pvbButton.setPreferredSize(new Dimension(200, 40));
 
         pvpButton.addActionListener(e -> {
-            System.out.println("PVP MODE");
-            launchGame(GameMode.PVP);
+            String nameX = JOptionPane.showInputDialog(this, "Enter name for Player X:", "Player X");
+            if (nameX == null || nameX.trim().isEmpty()) nameX = "Player X";
+
+            String nameO = JOptionPane.showInputDialog(this, "Enter name for Player O:", "Player O");
+            if (nameO == null || nameO.trim().isEmpty()) nameO = "Player O";
+
+            launchGame(GameMode.PVP, nameX, nameO);
         });
 
         pvbButton.addActionListener(e -> {
@@ -55,6 +60,15 @@ public class StartScreen extends JFrame {
         gameFrame.setLocationRelativeTo(null);
         gameFrame.setVisible(true);
 
+        this.dispose();
+    }
+    private void launchGame(GameMode mode, String playerXName, String playerOName) {
+        JFrame gameFrame = new JFrame("Tic-Tac-Toe");
+        gameFrame.setContentPane(new GameMain(mode, playerXName, playerOName));
+        gameFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        gameFrame.pack();
+        gameFrame.setLocationRelativeTo(null);
+        gameFrame.setVisible(true);
         this.dispose();
     }
 

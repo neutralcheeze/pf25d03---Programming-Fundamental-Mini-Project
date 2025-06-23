@@ -12,7 +12,8 @@ public class GameMain extends JPanel {
     private static final long serialVersionUID = 1L; // to prevent serializable warning
 
     // Define named constants for the drawing graphics
-
+    private String playerXName = "Player X";
+    private String playerOName = "Player O";
     public static final String TITLE = "Tic Tac Toe";
     public static final Color COLOR_BG = Color.WHITE;
     public static final Color COLOR_BG_STATUS = new Color(216, 216, 216);
@@ -88,6 +89,7 @@ public class GameMain extends JPanel {
             }
         });
 
+
         // Setup the status bar (JLabel) to display status message
         statusBar = new JLabel();
         statusBar.setFont(FONT_STATUS);
@@ -107,7 +109,11 @@ public class GameMain extends JPanel {
         initGame();
         newGame();
     }
-
+    public GameMain(GameMode mode, String playerXName, String playerOName) {
+        this(mode); // memanggil constructor utama
+        this.playerXName = playerXName;
+        this.playerOName = playerOName;
+    }
     private void botMove() {
         // Check is current state still playing after player's turn?
         Random random = new Random();
@@ -189,6 +195,7 @@ public class GameMain extends JPanel {
         repaint();
     }
 
+
     /** Custom painting codes on this JPanel */
     @Override
     public void paintComponent(Graphics g) {  // Callback via repaint()
@@ -196,22 +203,23 @@ public class GameMain extends JPanel {
         setBackground(COLOR_BG); // set its background color
 
         board.paint(g);  // ask the game board to paint itself
-
+        String currentName = (currentPlayer == Seed.CROSS) ? playerXName : playerOName;
         // Print status-bar message BO3
         if (currentState == State.PLAYING) { //saat bermain
             statusBar.setForeground(Color.BLACK);
-            statusBar.setText("Round " + (roundsPlayed + 1) + "  |  X's Score " + crossWins + " – " + noughtWins + " O's Score" + "  |  " + ((currentPlayer == Seed.CROSS) ? "X's Turn" : "O's Turn"));
+            statusBar.setText("Round " + (roundsPlayed + 1) + "  |  " + playerXName + "' score " + crossWins + " – " + noughtWins +  " " + playerOName + "'s Score" + "  |  " + ((currentPlayer == Seed.CROSS) ? playerXName+"'s Turn" : playerOName+"'s Turn"));
         } else if (currentState == State.DRAW) { //saat draw
             statusBar.setForeground(Color.RED);
-            statusBar.setText("It's a Draw! Click to play again.(X's Score  " + crossWins + " – " + noughtWins + " O's Score)");
+            statusBar.setText("It's a Draw! Click to play again.( " + playerXName + "' score " + crossWins + " – " + noughtWins + " " + playerOName + "'s Score)");
         } else if (currentState == State.CROSS_WON) { //saat X menang
             statusBar.setForeground(Color.RED);
-            statusBar.setText("'X' Won! Click to play again. (X's Score " + crossWins + " – " + noughtWins + " O's Score)");
+            statusBar.setText("'X' Won! Click to play again. ( "+playerXName + "' score " + crossWins + " – " + noughtWins + " " + playerOName + "'s Score)");
         } else if (currentState == State.NOUGHT_WON) { // saat O menang
             statusBar.setForeground(Color.RED);
-            statusBar.setText("'O' Won! Click to play again. X's Score  " + crossWins + " – " + noughtWins + " O's Score)");
+            statusBar.setText("'O' Won! Click to play again. " + playerXName + "' score " + crossWins + " – " + noughtWins + " " + playerOName + "'s Score)");
         }
     }
+
     private void resetMatch() {
         crossWins= 0;
         noughtWins = 0;
@@ -223,9 +231,9 @@ public class GameMain extends JPanel {
         if (roundScored || currentState == State.PLAYING) return;   // sudah dihitung
         String roundWinnerMessage = "";
         if(currentState == State.CROSS_WON){
-             roundWinnerMessage = "X is the winner of this round";
+             roundWinnerMessage = playerXName+" is the winner of this round";
         }else if(currentState == State.NOUGHT_WON){
-             roundWinnerMessage  = "O is the winner of this round";
+             roundWinnerMessage  = playerOName + " is the winner of this round";
         }
         else{
              roundWinnerMessage = "It is a Draw";
@@ -243,14 +251,15 @@ public class GameMain extends JPanel {
 
         // Cek apakah sudah ada juara Bo3
         if (crossWins == ROUNDS_TO_WIN || noughtWins == ROUNDS_TO_WIN) {
-            String champ = (crossWins == ROUNDS_TO_WIN) ? "X" : "O";
+            String champ = (crossWins == ROUNDS_TO_WIN) ? playerXName : playerOName ;
             JOptionPane.showMessageDialog(this, champ + " Won! " +
-                            "Final Score: X " + crossWins + " – " + noughtWins + " O", "Match Finished",
+                            "Final Score: " + playerXName +" "+ crossWins + " – " + noughtWins + " " + playerOName, "Match Finished",
                     JOptionPane.INFORMATION_MESSAGE
             );
             resetMatch();       // mulai BO3 baru
         }
     }
+
     /** The entry "main" method */
     public static void main(String[] args) {
         // Run GUI construction codes in Event-Dispatching thread for thread safety
