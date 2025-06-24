@@ -42,7 +42,7 @@ public class Board {
 
     /** Reset the game board, ready for new game */
     public void newGame() {
-        winRow1 = -1;
+        winRow1 = -1; // saat board.newGame() dipanggil pada gamemain maka koordinat akan direset menjadi -1
         winCol1 = -1;
         winRow2 = -1;
         winCol2 = -1;
@@ -133,14 +133,14 @@ public class Board {
                 cells[row][col].paint(g);  // ask the cell to paint itself
             }
         }
-        if (winRow1 != -1 && winCol1 != -1 && winRow2 != -1 && winCol2 != -1) {
-            g.setColor(Color.GREEN.darker());
-            int x1 = winCol1 * Cell.SIZE + Cell.SIZE / 2;
+        if (winRow1 != -1 && winCol1 != -1 && winRow2 != -1 && winCol2 != -1) { // jika semua titik koordinat sudah diganit maka
+            g.setColor(Color.GREEN.darker()); // Menentukan warna hijau sedikit gelap
+            int x1 = winCol1 * Cell.SIZE + Cell.SIZE / 2; // menghitung titik tengah dari ujung horizontal/vertikal/diagnal yang menang
             int y1 = winRow1 * Cell.SIZE + Cell.SIZE / 2;
             int x2 = winCol2 * Cell.SIZE + Cell.SIZE / 2;
             int y2 = winRow2 * Cell.SIZE + Cell.SIZE / 2;
-            g.drawLine(x1 , y1, x2, y2);
-            g.drawLine(x1, y1 , x2, y2);
+            g.drawLine(x1 , y1, x2, y2); // memunculkan garis dari x1 y1 ke x2 y2
+            //ternyata terdouble di bawah
         }
     }
 }
