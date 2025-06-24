@@ -1,0 +1,5 @@
+.gitignore  # this file self
+*.class     # all .class file
+
+# intellij files
+.idea
