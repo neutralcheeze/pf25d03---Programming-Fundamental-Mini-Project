@@ -12,6 +12,8 @@ public class GameMain extends JPanel {
     private static final long serialVersionUID = 1L; // to prevent serializable warning
 
     // Define named constants for the drawing graphics
+    private String playerXName = "Player X";
+    private String playerOName = "Player O";
     public static final String TITLE = "Tic Tac Toe";
     public static final Color COLOR_BG = Color.WHITE;
     public static final Color COLOR_BG_STATUS = new Color(216, 216, 216);
@@ -138,6 +140,8 @@ public class GameMain extends JPanel {
     public GameMain(GameMode mode, String playerXName, String playerOName) {
         // Logika untuk menyimpan nama pemain bisa ditambahkan di sini
         this(mode); // Memanggil constructor utama
+        this.playerXName = playerXName;
+        this.playerOName = playerOName;
     }
 
     // Logika untuk gerakan bot (secara acak)
@@ -218,17 +222,13 @@ public class GameMain extends JPanel {
 
         // Menampilkan pesan status berdasarkan state permainan
         if (currentState == State.PLAYING) { //saat bermain
-            statusBar.setForeground(Color.BLACK);
-            statusBar.setText("Round " + (roundsPlayed + 1) + "  |  X's Score " + crossWins + " – " + noughtWins + " O's Score" + "  |  " + ((currentPlayer == Seed.CROSS) ? "X's Turn" : "O's Turn"));
+            statusBar.setText("Round " + (roundsPlayed + 1) + "  |  " + playerXName + "' score " + crossWins + " – " + noughtWins +  " " + playerOName + "'s Score" + "  |  " + ((currentPlayer == Seed.CROSS) ? playerXName+"'s Turn" : playerOName+"'s Turn"));
         } else if (currentState == State.DRAW) { //saat draw
-            statusBar.setForeground(Color.RED);
-            statusBar.setText("It's a Draw! Click to play again.(X's Score  " + crossWins + " – " + noughtWins + " O's Score)");
+            statusBar.setText("It's a Draw! Click to play again.( " + playerXName + "' score " + crossWins + " – " + noughtWins + " " + playerOName + "'s Score)");
         } else if (currentState == State.CROSS_WON) { //saat X menang
-            statusBar.setForeground(Color.RED);
-            statusBar.setText("'X' Won! Click to play again. (X's Score " + crossWins + " – " + noughtWins + " O's Score)");
+            statusBar.setText(playerXName + " Won! Click to play again. ( "+playerXName + "' score " + crossWins + " – " + noughtWins + " " + playerOName + "'s Score)");
         } else if (currentState == State.NOUGHT_WON) { // saat O menang
-            statusBar.setForeground(Color.RED);
-            statusBar.setText("'O' Won! Click to play again. X's Score  " + crossWins + " – " + noughtWins + " O's Score)");
+            statusBar.setText( playerOName + " Won! Click to play again. " + playerXName + "' score " + crossWins + " – " + noughtWins + " " + playerOName + "'s Score)");
         }
     }
 
@@ -248,9 +248,9 @@ public class GameMain extends JPanel {
         // Menyiapkan pesan pemenang ronde
         String roundWinnerMessage = "";
         if(currentState == State.CROSS_WON){
-            roundWinnerMessage = "X is the winner of this round";
+            roundWinnerMessage = playerXName+" is the winner of this round";
         }else if(currentState == State.NOUGHT_WON){
-            roundWinnerMessage  = "O is the winner of this round";
+            roundWinnerMessage = playerOName+" is the winner of this round";
         }
         else{
             roundWinnerMessage = "It is a Draw";
@@ -271,9 +271,9 @@ public class GameMain extends JPanel {
 
         // Cek apakah sudah ada pemenang match (Best of 3)
         if (crossWins == ROUNDS_TO_WIN || noughtWins == ROUNDS_TO_WIN) {
-            String champ = (crossWins == ROUNDS_TO_WIN) ? "X" : "O";
+            String champ = (crossWins == ROUNDS_TO_WIN) ? playerXName : playerOName ;
             JOptionPane.showMessageDialog(this, champ + " Won! " +
-                            "Final Score: X " + crossWins + " – " + noughtWins + " O", "Match Finished",
+                            "Final Score: " + playerXName +" "+ crossWins + " – " + noughtWins + " " + playerOName, "Match Finished",
                     JOptionPane.INFORMATION_MESSAGE
             );
             resetMatch();       // Memulai match baru
