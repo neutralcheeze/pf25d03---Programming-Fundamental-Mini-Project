@@ -213,10 +213,10 @@ public class GameMain extends JPanel {
             statusBar.setText("It's a Draw! Click to play again.( " + playerXName + "' score " + crossWins + " – " + noughtWins + " " + playerOName + "'s Score)");
         } else if (currentState == State.CROSS_WON) { //saat X menang
             statusBar.setForeground(Color.RED);
-            statusBar.setText("'X' Won! Click to play again. ( "+playerXName + "' score " + crossWins + " – " + noughtWins + " " + playerOName + "'s Score)");
+            statusBar.setText(playerXName + " Won! Click to play again. ( "+playerXName + "' score " + crossWins + " – " + noughtWins + " " + playerOName + "'s Score)");
         } else if (currentState == State.NOUGHT_WON) { // saat O menang
             statusBar.setForeground(Color.RED);
-            statusBar.setText("'O' Won! Click to play again. " + playerXName + "' score " + crossWins + " – " + noughtWins + " " + playerOName + "'s Score)");
+            statusBar.setText(playerOName + " Won! Click to play again. " + playerXName + "' score " + crossWins + " – " + noughtWins + " " + playerOName + "'s Score)");
         }
     }
 
