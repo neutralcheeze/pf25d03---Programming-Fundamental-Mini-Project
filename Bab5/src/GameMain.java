@@ -18,32 +18,38 @@ public class GameMain extends JPanel {
     public static final Color COLOR_CROSS = new Color(239, 105, 80);  // Red #EF6950
     public static final Color COLOR_NOUGHT = new Color(64, 154, 225); // Blue #409AE1
     public static final Font FONT_STATUS = new Font("OCR A Extended", Font.PLAIN, 14);
+    //Round untuk game
+    private int crossWins   = 0;   // jumlah kemenangan X
+    private int noughtWins  = 0;   // jumlah kemenangan O
+    private int roundsPlayed = 0;  // berapa ronde telah selesai
+    private final int ROUNDS_TO_WIN = 2;   //butuh 2 kemenangan
+    private boolean roundScored = false;   // agar skor 1 ronde tidak terhitung dua kali
 
     // Define game objects
-
-    // GameMode
     private GameMode mode;
     private Board board;         // the game board
     private State currentState;  // the current state of the game
     private Seed currentPlayer;  // the current player
-
     private Seed playerSeed;
     private Seed botSeed;
     private JLabel statusBar;    // for displaying status message
 
+    // Variabel untuk menyimpan posisi mouse untuk efek hover
+    private int hoveredRow = -1;
+    private int hoveredCol = -1;
+
     /** Constructor to setup the UI and game components */
     public GameMain(GameMode mode) {
-
         this.mode = mode;
         initGame();
 
-        // This JPanel fires MouseEvent
+        // Listener untuk event klik mouse
         super.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {  // mouse-clicked handler
                 int mouseX = e.getX();
                 int mouseY = e.getY();
-                // Get the row and column clicked
+                // Mendapatkan baris dan kolom yang diklik
                 int row = mouseY / Cell.SIZE;
                 int col = mouseX / Cell.SIZE;
 
@@ -53,7 +59,7 @@ public class GameMain extends JPanel {
 
                         if (mode == GameMode.PVB) {
                             if (currentPlayer == playerSeed) {
-                                // Update cells[][] and return the new game state after the move
+                                // Memperbarui state game setelah pemain melangkah
                                 currentState = board.stepGame(playerSeed, row, col);
 
                                 if (currentState == State.PLAYING) {
@@ -62,24 +68,54 @@ public class GameMain extends JPanel {
                                 }
                             }
                         } else if (mode == GameMode.PVP) {
-                            // Switch player
+                            // Mengganti giliran pemain
                             currentState = board.stepGame(currentPlayer, row, col);
                             if (currentState == State.PLAYING) {
                                 currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
                             }
                         }
-
                     }
-
-                } else {        // game over
-                    newGame();  // restart the game
+                } else {        // Jika game sudah selesai
+                    newGame();  // Memulai game baru
                 }
-                // Refresh the drawing canvas
-                repaint();  // Callback paintComponent().
+                // Menggambar ulang papan permainan
+                repaint();
+                updateScore(); // Memperbarui skor
+            }
+
+            // Event untuk mereset highlight saat kursor mouse keluar dari area papan
+            @Override
+            public void mouseExited(MouseEvent e) {
+                hoveredRow = -1;
+                hoveredCol = -1;
+                repaint();
             }
         });
 
-        // Setup the status bar (JLabel) to display status message
+        // Listener untuk mendeteksi gerakan mouse di atas papan untuk efek hover
+        super.addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                int row = e.getY() / Cell.SIZE;
+                int col = e.getX() / Cell.SIZE;
+
+                if (row >= 0 && row < Board.ROWS && col >= 0 && col < Board.COLS) {
+                    if (hoveredRow != row || hoveredCol != col) { // Hanya update jika posisi berubah
+                        hoveredRow = row;
+                        hoveredCol = col;
+                        repaint();
+                    }
+                } else {
+                    if (hoveredRow != -1 || hoveredCol != -1) { // Hanya update jika sebelumnya ada highlight
+                        hoveredRow = -1;
+                        hoveredCol = -1;
+                        repaint();
+                    }
+                }
+            }
+        });
+
+        // Pengaturan status bar untuk menampilkan pesan
         statusBar = new JLabel();
         statusBar.setFont(FONT_STATUS);
         statusBar.setBackground(COLOR_BG_STATUS);
@@ -91,28 +127,31 @@ public class GameMain extends JPanel {
         super.setLayout(new BorderLayout());
         super.add(statusBar, BorderLayout.PAGE_END); // same as SOUTH
         super.setPreferredSize(new Dimension(Board.CANVAS_WIDTH, Board.CANVAS_HEIGHT + 30));
-        // account for statusBar in height
         super.setBorder(BorderFactory.createLineBorder(COLOR_BG_STATUS, 2, false));
 
-        // Set up Game
+        // Inisialisasi permainan
         initGame();
         newGame();
     }
 
+    // Constructor tambahan untuk menerima nama pemain (jika dikembangkan lebih lanjut)
+    public GameMain(GameMode mode, String playerXName, String playerOName) {
+        // Logika untuk menyimpan nama pemain bisa ditambahkan di sini
+        this(mode); // Memanggil constructor utama
+    }
+
+    // Logika untuk gerakan bot (secara acak)
     private void botMove() {
-        // Check is current state still playing after player's turn?
         Random random = new Random();
         if (currentState == State.PLAYING) {
-            // Loop until bot's row and col in empty seed
             while (true) {
-
-                // set bot's row and col with random number (0 - 2)
                 int botRow = random.nextInt(Board.ROWS);
                 int botCol = random.nextInt(Board.COLS);
 
-                // Exit loop if bot's row and col in empty seed
+                // Keluar dari loop jika sel yang dipilih acak masih kosong
                 if (board.cells[botRow][botCol].content == Seed.NO_SEED) {
                     currentState = board.stepGame(botSeed, botRow, botCol);
+                    updateScore(); //mengupdate skor permainan setelah bot jalan
                     repaint();
                     break;
                 }
@@ -122,12 +161,6 @@ public class GameMain extends JPanel {
 
     /** Initialize the game (run once) */
     public void initGame() {
-//        JFrame frame = new JFrame("Tic-Tac-Toe");
-//        frame.setContentPane(this);
-//        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//        frame.setSize(Board.CANVAS_WIDTH, Board.CANVAS_HEIGHT);
-//        frame.setLocationRelativeTo(null);
-//        frame.setVisible(true);
         board = new Board();  // allocate the game-board
     }
 
@@ -136,18 +169,15 @@ public class GameMain extends JPanel {
         board.newGame();
         for (int row = 0; row < Board.ROWS; ++row) {
             for (int col = 0; col < Board.COLS; ++col) {
-                board.cells[row][col].content = Seed.NO_SEED; // all cells empty
+                board.cells[row][col].content = Seed.NO_SEED; // Mengosongkan semua sel
             }
         }
+        currentState = State.PLAYING;  // Siap untuk bermain
+        roundScored = false; // Mereset status skor ronde
 
-        currentState = State.PLAYING;  // ready to play
-
-        // PVB Game Mode
+        // Pengaturan untuk mode Player vs Bot
         if (mode == GameMode.PVB) {
-            // Random seed CROSS or NOUGHT
             boolean isPlayerCross = new Random().nextBoolean();
-
-            // Assign playerSeed and botSeed to random seed
             if (isPlayerCross) {
                 playerSeed = Seed.CROSS;
                 botSeed = Seed.NOUGHT;
@@ -155,25 +185,16 @@ public class GameMain extends JPanel {
                 playerSeed = Seed.NOUGHT;
                 botSeed = Seed.CROSS;
             }
-
-            // First init for current player, first always CROSS
-            currentPlayer = Seed.CROSS;
-
-            // Check if botseed is cross, bot will move first and set currentPlayer to playerSeed(NOUGHT)
+            currentPlayer = Seed.CROSS; // X selalu jalan pertama
             if (botSeed == Seed.CROSS) {
-                botMove();
+                botMove(); // Jika bot mendapat giliran pertama
                 currentPlayer = playerSeed;
             } else {
                 currentPlayer = playerSeed;
             }
-        } else if (mode == GameMode.PVP) {
-            currentPlayer = Seed.CROSS;    // cross plays first
+        } else if (mode == GameMode.PVP) { // Pengaturan untuk mode Player vs Player
+            currentPlayer = Seed.CROSS;    // X jalan pertama
         }
-
-
-        System.out.println(botSeed);
-
-        // update
         repaint();
     }
 
@@ -181,41 +202,96 @@ public class GameMain extends JPanel {
     @Override
     public void paintComponent(Graphics g) {  // Callback via repaint()
         super.paintComponent(g);
-        setBackground(COLOR_BG); // set its background color
+        setBackground(COLOR_BG); // Mengatur warna background
 
-        board.paint(g);  // ask the game board to paint itself
+        board.paint(g);  // Meminta papan untuk menggambar dirinya sendiri
 
-        // Print status-bar message
-        if (currentState == State.PLAYING) {
+        // Menggambar kotak highlight di sel yang sedang disorot oleh mouse
+        if (currentState == State.PLAYING && hoveredRow != -1 && hoveredCol != -1) {
+            if (board.cells[hoveredRow][hoveredCol].content == Seed.NO_SEED) {
+                // Atur warna highlight
+                g.setColor(new Color(173, 216, 230, 128)); // Biru muda semi-transparan
+                // Gambar persegi panjang di atas sel
+                g.fillRect(hoveredCol * Cell.SIZE, hoveredRow * Cell.SIZE, Cell.SIZE, Cell.SIZE);
+            }
+        }
+
+        // Menampilkan pesan status berdasarkan state permainan
+        if (currentState == State.PLAYING) { //saat bermain
             statusBar.setForeground(Color.BLACK);
-            statusBar.setText((currentPlayer == Seed.CROSS) ? "X's Turn" : "O's Turn");
-        } else if (currentState == State.DRAW) {
+            statusBar.setText("Round " + (roundsPlayed + 1) + "  |  X's Score " + crossWins + " – " + noughtWins + " O's Score" + "  |  " + ((currentPlayer == Seed.CROSS) ? "X's Turn" : "O's Turn"));
+        } else if (currentState == State.DRAW) { //saat draw
             statusBar.setForeground(Color.RED);
-            statusBar.setText("It's a Draw! Click to play again.");
-        } else if (currentState == State.CROSS_WON) {
+            statusBar.setText("It's a Draw! Click to play again.(X's Score  " + crossWins + " – " + noughtWins + " O's Score)");
+        } else if (currentState == State.CROSS_WON) { //saat X menang
             statusBar.setForeground(Color.RED);
-            statusBar.setText("'X' Won! Click to play again.");
+            statusBar.setText("'X' Won! Click to play again. (X's Score " + crossWins + " – " + noughtWins + " O's Score)");
+        } else if (currentState == State.NOUGHT_WON) { // saat O menang
+            statusBar.setForeground(Color.RED);
+            statusBar.setText("'O' Won! Click to play again. X's Score  " + crossWins + " – " + noughtWins + " O's Score)");
+        }
+    }
+
+    // Mereset seluruh match (skor dan ronde)
+    private void resetMatch() {
+        crossWins= 0;
+        noughtWins = 0;
+        roundsPlayed =0;
+        roundScored = false;
+        newGame();          // Memulai ronde pertama dari match baru
+    }
+
+    // Memperbarui skor dan menampilkan pemenang ronde melalui pop-up
+    private void updateScore() {
+        if (roundScored || currentState == State.PLAYING) return;   // Mencegah skor dihitung dua kali
+
+        // Menyiapkan pesan pemenang ronde
+        String roundWinnerMessage = "";
+        if(currentState == State.CROSS_WON){
+            roundWinnerMessage = "X is the winner of this round";
+        }else if(currentState == State.NOUGHT_WON){
+            roundWinnerMessage  = "O is the winner of this round";
+        }
+        else{
+            roundWinnerMessage = "It is a Draw";
+        }
+
+        // Menambah skor pemenang
+        if (currentState == State.CROSS_WON) {
+            crossWins++;
         } else if (currentState == State.NOUGHT_WON) {
-            statusBar.setForeground(Color.RED);
-            statusBar.setText("'O' Won! Click to play again.");
+            noughtWins++;
+        }
+        roundsPlayed++;
+        roundScored = true;
+
+        // Menampilkan pesan pop-up untuk pemenang ronde
+        JOptionPane.showMessageDialog(this, roundWinnerMessage, "Winner of round " + roundsPlayed,
+                JOptionPane.INFORMATION_MESSAGE);
+
+        // Cek apakah sudah ada pemenang match (Best of 3)
+        if (crossWins == ROUNDS_TO_WIN || noughtWins == ROUNDS_TO_WIN) {
+            String champ = (crossWins == ROUNDS_TO_WIN) ? "X" : "O";
+            JOptionPane.showMessageDialog(this, champ + " Won! " +
+                            "Final Score: X " + crossWins + " – " + noughtWins + " O", "Match Finished",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+            resetMatch();       // Memulai match baru
         }
     }
 
     /** The entry "main" method */
     public static void main(String[] args) {
-        // Run GUI construction codes in Event-Dispatching thread for thread safety
+        // Menjalankan kode pembuatan GUI di Event-Dispatching thread untuk keamanan thread
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 JFrame frame = new JFrame(TITLE);
-                // Set the content-pane of the JFrame to an instance of main JPanel
-//                frame.setContentPane(new GameMain());
-
-                frame.setContentPane(new StartScreen());
+                frame.setContentPane(new StartScreen()); // Memulai dari StartScreen
 
                 frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 frame.pack();
-                frame.setLocationRelativeTo(null); // center the application window
-                frame.setVisible(true);            // show it
+                frame.setLocationRelativeTo(null); // Memposisikan window di tengah layar
+                frame.setVisible(true);            // Menampilkan window
             }
         });
     }

@@ -40,7 +40,6 @@ public class Board {
         }
     }
 
-
     /** Reset the game board, ready for new game */
     public void newGame() {
         winRow1 = -1;
