@@ -24,6 +24,8 @@ public class GameMain extends JPanel {
     private int crossWins   = 0;   // jumlah kemenangan X
     private int noughtWins  = 0;   // jumlah kemenangan O
     private int roundsPlayed = 0;  // berapa ronde telah selesai
+    private int playerWIns = 0;
+    private int botWin = 0;
     private final int ROUNDS_TO_WIN = 2;   //butuh 2 kemenangan
     private boolean roundScored = false;   // agar skor 1 ronde tidak terhitung dua kali
 
@@ -62,7 +64,16 @@ public class GameMain extends JPanel {
                         if (mode == GameMode.PVB) {
                             if (currentPlayer == playerSeed) {
                                 // Memperbarui state game setelah pemain melangkah
-                                currentState = board.stepGame(playerSeed, row, col);
+                                State result = board.stepGame(playerSeed, row, col);
+                                if ((result == State.CROSS_WON && playerSeed == Seed.CROSS) ||
+                                        (result == State.NOUGHT_WON && playerSeed == Seed.NOUGHT)) {
+                                    currentState = State.PLAYER_WON;
+                                } else if ((result == State.CROSS_WON && playerSeed != Seed.CROSS) ||
+                                        (result == State.NOUGHT_WON && playerSeed != Seed.NOUGHT)) {
+                                    currentState = State.BOTWON;
+                                } else {
+                                    currentState = result;
+                                }
 
                                 if (currentState == State.PLAYING) {
                                     botMove();
@@ -154,7 +165,16 @@ public class GameMain extends JPanel {
 
                 // Keluar dari loop jika sel yang dipilih acak masih kosong
                 if (board.cells[botRow][botCol].content == Seed.NO_SEED) {
-                    currentState = board.stepGame(botSeed, botRow, botCol);
+                    State result = board.stepGame(botSeed, botRow, botCol);
+                    if ((result == State.CROSS_WON && botSeed == Seed.CROSS) ||
+                            (result == State.NOUGHT_WON && botSeed == Seed.NOUGHT)) {
+                        currentState = State.BOTWON;
+                    } else if ((result == State.CROSS_WON && botSeed != Seed.CROSS) ||
+                            (result == State.NOUGHT_WON && botSeed != Seed.NOUGHT)) {
+                        currentState = State.PLAYER_WON;
+                    } else {
+                        currentState = result;
+                    }
                     updateScore(); //mengupdate skor permainan setelah bot jalan
                     repaint();
                     break;
@@ -178,6 +198,7 @@ public class GameMain extends JPanel {
         }
         currentState = State.PLAYING;  // Siap untuk bermain
         roundScored = false; // Mereset status skor ronde
+
 
         // Pengaturan untuk mode Player vs Bot
         if (mode == GameMode.PVB) {
@@ -221,14 +242,26 @@ public class GameMain extends JPanel {
         }
 
         // Menampilkan pesan status berdasarkan state permainan
-        if (currentState == State.PLAYING) { //saat bermain
-            statusBar.setText("Round " + (roundsPlayed + 1) + "  |  " + playerXName + "' score " + crossWins + " – " + noughtWins +  " " + playerOName + "'s Score" + "  |  " + ((currentPlayer == Seed.CROSS) ? playerXName+"'s Turn" : playerOName+"'s Turn"));
-        } else if (currentState == State.DRAW) { //saat draw
-            statusBar.setText("It's a Draw! Click to play again.( " + playerXName + "' score " + crossWins + " – " + noughtWins + " " + playerOName + "'s Score)");
-        } else if (currentState == State.CROSS_WON) { //saat X menang
-            statusBar.setText(playerXName + " Won! Click to play again. ( "+playerXName + "' score " + crossWins + " – " + noughtWins + " " + playerOName + "'s Score)");
-        } else if (currentState == State.NOUGHT_WON) { // saat O menang
-            statusBar.setText( playerOName + " Won! Click to play again. " + playerXName + "' score " + crossWins + " – " + noughtWins + " " + playerOName + "'s Score)");
+        if(mode == GameMode.PVP) {
+            if (currentState == State.PLAYING) { //saat bermain
+                statusBar.setText("Round " + (roundsPlayed + 1) + "  |  " + playerXName + "' score " + crossWins + " – " + noughtWins + " " + playerOName + "'s Score" + "  |  " + ((currentPlayer == Seed.CROSS) ? playerXName + "'s Turn" : playerOName + "'s Turn"));
+            } else if (currentState == State.DRAW) { //saat draw
+                statusBar.setText("It's a Draw! Click to play again.( " + playerXName + "' score " + crossWins + " – " + noughtWins + " " + playerOName + "'s Score)");
+            } else if (currentState == State.CROSS_WON) { //saat X menang
+                statusBar.setText(playerXName + " Won! Click to play again. ( " + playerXName + "' score " + crossWins + " – " + noughtWins + " " + playerOName + "'s Score)");
+            } else if (currentState == State.NOUGHT_WON) { // saat O menang
+                statusBar.setText(playerOName + " Won! Click to play again. " + playerXName + "' score " + crossWins + " – " + noughtWins + " " + playerOName + "'s Score)");
+            }
+        }else{
+            if (currentState == State.PLAYING) { //saat bermain
+                statusBar.setText("Round " + (roundsPlayed + 1) + "  |  " + playerXName + "' score " + playerWIns + " – " + botWin + " " + playerOName + "'s Score" + "  |  " + ((currentPlayer == Seed.CROSS) ? playerXName + "'s Turn" : playerOName + "'s Turn"));
+            } else if (currentState == State.DRAW) { //saat draw
+                statusBar.setText("It's a Draw! Click to play again.( " + playerXName + "' score " + playerWIns + " – " + botWin + " " + playerOName + "'s Score)");
+            } else if (currentState == State.PLAYER_WON) { //saat X menang
+                statusBar.setText(playerXName + " Won! Click to play again. ( " + playerXName + "' score " + playerWIns + " – " + botWin + " " + playerOName + "'s Score)");
+            } else if (currentState == State.BOTWON) { // saat O menang
+                statusBar.setText(playerOName + " Won! Click to play again. " + playerXName + "' score " + playerWIns + " – " + botWin + " " + playerOName + "'s Score)");
+            }
         }
     }
 
@@ -238,6 +271,8 @@ public class GameMain extends JPanel {
         noughtWins = 0;
         roundsPlayed =0;
         roundScored = false;
+        playerWIns = 0;
+        botWin = 0;
         newGame();          // Memulai ronde pertama dari match baru
     }
 
@@ -247,38 +282,88 @@ public class GameMain extends JPanel {
 
         // Menyiapkan pesan pemenang ronde
         String roundWinnerMessage = "";
-        if(currentState == State.CROSS_WON){
-            roundWinnerMessage = playerXName+" is the winner of this round";
-        }else if(currentState == State.NOUGHT_WON){
-            roundWinnerMessage = playerOName+" is the winner of this round";
-        }
-        else{
-            roundWinnerMessage = "It is a Draw";
+        if (mode == GameMode.PVP) {
+            roundWinnerMessage = "";
+            if (currentState == State.CROSS_WON) {
+                roundWinnerMessage = playerXName + " is the winner of this round";
+            } else if (currentState == State.NOUGHT_WON) {
+                roundWinnerMessage = playerOName + " is the winner of this round";
+            } else {
+                roundWinnerMessage = "It is a Draw";
+            }
+        } else {
+            roundWinnerMessage = "";
+            if (currentState == State.PLAYER_WON) {
+                roundWinnerMessage = playerXName + " is the winner of this round";
+            } else if (currentState == State.BOTWON) {
+                roundWinnerMessage = playerOName + " is the winner of this round";
+            } else {
+                roundWinnerMessage = "It is a Draw";
+            }
         }
 
         // Menambah skor pemenang
-        if (currentState == State.CROSS_WON) {
-            crossWins++;
-        } else if (currentState == State.NOUGHT_WON) {
-            noughtWins++;
+        if (mode == GameMode.PVP) {
+            if (currentState == State.CROSS_WON) {
+                crossWins++;
+            } else if (currentState == State.NOUGHT_WON) {
+                noughtWins++;
+            }
+            roundsPlayed++;
+            roundScored = true;
+        } else {
+            if (currentState == State.PLAYER_WON) {
+                playerWIns++;
+            } else if (currentState == State.BOTWON) {
+                botWin++;
+            }
+            roundsPlayed++;
+            roundScored = true;
         }
-        roundsPlayed++;
-        roundScored = true;
 
         // Menampilkan pesan pop-up untuk pemenang ronde
         JOptionPane.showMessageDialog(this, roundWinnerMessage, "Winner of round " + roundsPlayed,
                 JOptionPane.INFORMATION_MESSAGE);
 
         // Cek apakah sudah ada pemenang match (Best of 3)
+
         if (crossWins == ROUNDS_TO_WIN || noughtWins == ROUNDS_TO_WIN) {
-            String champ = (crossWins == ROUNDS_TO_WIN) ? playerXName : playerOName ;
+            String champ = (crossWins == ROUNDS_TO_WIN) ? playerXName : playerOName;
             JOptionPane.showMessageDialog(this, champ + " Won! " +
-                            "Final Score: " + playerXName +" "+ crossWins + " – " + noughtWins + " " + playerOName, "Match Finished",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
-            resetMatch();       // Memulai match baru
+                            "Final Score: " + playerXName + " " + crossWins + " – " + noughtWins + " " + playerOName, "Match Finished",
+                    JOptionPane.INFORMATION_MESSAGE);
+            int option = JOptionPane.showOptionDialog(this, "Game over! \n Do you want to play again?", "Play Again?",
+                    JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    new String[]{"Replay", "Quit"},
+                    "Replay");
+
+            if (option == JOptionPane.YES_OPTION) {
+                resetMatch();
+            } else {
+                System.exit(0);  // Keluar dari aplikasi
+            }
+        }
+        if (playerWIns == 2 || botWin == 2) {
+            String champ = (playerWIns == 2) ? playerXName : playerOName;
+            JOptionPane.showMessageDialog(this, champ + " Won! " +
+                            "Final Score: " + playerXName + " " + playerWIns + " – " + botWin + " " + playerOName, "Match Finished",
+                    JOptionPane.INFORMATION_MESSAGE);
+            int option = JOptionPane.showOptionDialog(this, "Game over! \n Do you want to play again?", "Play Again?",
+                    JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    new String[]{"Replay", "Quit"},
+                    "Replay");
+
+            if (option == JOptionPane.YES_OPTION) {
+                resetMatch();
+
+            } else {
+                System.exit(0);  // Keluar dari aplikasi
+            }
         }
     }
+
 
     /** The entry "main" method */
     public static void main(String[] args) {
