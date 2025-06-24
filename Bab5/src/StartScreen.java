@@ -31,8 +31,11 @@ public class StartScreen extends JFrame {
         });
 
         pvbButton.addActionListener(e -> {
+            String nameX = JOptionPane.showInputDialog(this, "Enter name for Player X:", "Player X");
+            if (nameX == null || nameX.trim().isEmpty()) nameX = "Player X";
+            String nameO = "Bot";
             System.out.println("PVB MODE");
-            launchGame(GameMode.PVB);
+            launchGame(GameMode.PVB, nameX, nameO);
         });
 
         leaderboardButton.addActionListener(e -> {
@@ -52,23 +55,14 @@ public class StartScreen extends JFrame {
 
     }
 
-    private void launchGame(GameMode mode) {
+    private void launchGame(GameMode mode, String playerXName, String playerOName) {
         JFrame gameFrame = new JFrame("Tic-Tac-Toe");
-        gameFrame.setContentPane(new GameMain(mode));
+        gameFrame.setContentPane(new GameMain(mode ,playerXName, playerOName));
         gameFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         gameFrame.pack();
         gameFrame.setLocationRelativeTo(null);
         gameFrame.setVisible(true);
 
-        this.dispose();
-    }
-    private void launchGame(GameMode mode, String playerXName, String playerOName) {
-        JFrame gameFrame = new JFrame("Tic-Tac-Toe");
-        gameFrame.setContentPane(new GameMain(mode, playerXName, playerOName));
-        gameFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        gameFrame.pack();
-        gameFrame.setLocationRelativeTo(null);
-        gameFrame.setVisible(true);
         this.dispose();
     }
 
