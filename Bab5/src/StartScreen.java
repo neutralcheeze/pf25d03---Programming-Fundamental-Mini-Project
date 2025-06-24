@@ -67,7 +67,7 @@ public class StartScreen extends JFrame {
         // Menambahkan fungsi saat tombol Player vs Bot diklik
         pvbButton.addActionListener(e -> {
             // Meminta input nama untuk pemain
-            String nameX = JOptionPane.showInputDialog(this, "Enter name for Player X:", "Your Name");
+            String nameX = JOptionPane.showInputDialog(this, "Enter name for Player X:", "Enter Your Name");
             if (nameX == null || nameX.trim().isEmpty()) nameX = "Player"; // Nama default jika input kosong
 
             // Menetapkan "Bot" sebagai nama pemain kedua
