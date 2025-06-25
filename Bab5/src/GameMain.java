@@ -271,8 +271,6 @@ public class GameMain extends JPanel {
         /** Mereset seluruh match, termasuk skor dan ronde */
         private void resetMatch () {
             // Menghentikan musik latar saat match selesai
-            BackgroundMusicPlayer.stop();
-
             crossWins = 0;
             noughtWins = 0;
             roundsPlayed = 0;
@@ -329,7 +327,6 @@ public class GameMain extends JPanel {
             // Menampilkan pesan pop-up pemenang ronde
             JOptionPane.showMessageDialog(this, roundWinnerMessage, "Winner of round " + roundsPlayed,
                     JOptionPane.INFORMATION_MESSAGE);
-
         // Cek jika ada pemenang match (Best of 3)
         if (crossWins == ROUNDS_TO_WIN || noughtWins == ROUNDS_TO_WIN) { // Jika skor salah satu antara x atau o sudah 2 maka dapat di runAdd commentMore actions
             String champ = (crossWins == ROUNDS_TO_WIN) ? playerXName : playerOName;
@@ -339,13 +336,15 @@ public class GameMain extends JPanel {
             int option = JOptionPane.showOptionDialog(this, "Game over! \n Do you want to play again?", "Play Again?",
                     JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, //memunculkan joptionpane setelahnya untuk menanyakan apakah ingin bermain lagi atau keluar apliaksi
                     null,
-                    new String[]{"Replay", "Quit"},
+                    new String[]{"Replay", "Quit to Main Menu"},
                     "Replay");
 
             if (option == JOptionPane.YES_OPTION) {
                 resetMatch();
             } else {
-                System.exit(0);  // Keluar dari aplikasi
+                StartScreen startScreen = new StartScreen();
+                startScreen.setVisible(true);
+                SwingUtilities.getWindowAncestor(this).dispose();
             }
         } else if (playerWIns == ROUNDS_TO_WIN || botWin == ROUNDS_TO_WIN) {
                 String champ = (playerWIns == ROUNDS_TO_WIN) ? playerXName : playerOName;
@@ -366,14 +365,16 @@ public class GameMain extends JPanel {
                         "Game over! \nDo you want to play again?", "Play Again?",
                         JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE,
                         null,
-                        new String[]{"Replay", "Quit"},
+                        new String[]{"Replay", "Quit to Main Menu"},
                         "Replay");
 
                 if (option == JOptionPane.YES_OPTION) {
                     resetMatch();// Restart match
 
                 } else {
-                        System.exit(0);  // Keluar dari aplikasi
+                    StartScreen startScreen = new StartScreen();
+                    startScreen.setVisible(true);
+                    SwingUtilities.getWindowAncestor(this).dispose();
                 }
         }
     }
