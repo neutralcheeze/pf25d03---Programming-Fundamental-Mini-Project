@@ -2,6 +2,7 @@ package Bab5.src;
 
 import javax.swing.*;
 import java.awt.*;
+import java.sql.SQLException;
 
 public class RegisterScreen extends JPanel {
 
@@ -92,6 +93,15 @@ public class RegisterScreen extends JPanel {
         add(registerBtn);
         add(Box.createVerticalStrut(10));
 
+
+        registerBtn.addActionListener(e -> {
+           String username = usernameField.getText();
+           String password = new String(passwordField.getPassword());
+           String confirmation_password = new String(confirmPasswordField.getPassword());
+
+           handleRegister(username, password, confirmation_password);
+        });
+
         JLabel footerLabel = new JLabel("Already have an account?");
         footerLabel.setFont(LABEL_FONT);
         footerLabel.setForeground(PRIMARY_TEXT_COLOR);
@@ -106,12 +116,58 @@ public class RegisterScreen extends JPanel {
         loginButton.setBorderPainted(false);
         loginButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
+        loginButton.addActionListener(e -> {
+            javax.swing.SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    JFrame frame = new JFrame("Login");
+                    frame.setContentPane(new LoginScreen(frame));
+                    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                    frame.pack();
+                    frame.setLocationRelativeTo(null);
+                    frame.setVisible(true);
+                }
+            });
+
+            SwingUtilities.getWindowAncestor(this).dispose();
+
+        });
+
         JPanel footerPanel = new JPanel();
         footerPanel.setBackground(BG_COLOR);
         footerPanel.add(footerLabel, BorderLayout.CENTER);
         footerPanel.add(loginButton, BorderLayout.CENTER);
         footerPanel.setAlignmentX(LEFT_ALIGNMENT);
         add(footerPanel);
+    }
+
+    void handleRegister(String username, String password, String confirmation_password) {
+        if (username.isEmpty() || password.isEmpty() || confirmation_password.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please input all fields.");
+            return;
+        }
+
+        if (!password.equals(confirmation_password)) {
+            JOptionPane.showMessageDialog(this, "Password confirmation does not match");
+            return;
+        }
+
+        try {
+            Authentication auth = new Authentication();
+            if (auth.isUsernameFound(username)) {
+                JOptionPane.showMessageDialog(this, "Username already taken");
+                return;
+            }
+
+           boolean success = auth.register(username, password, confirmation_password);
+            if (success) {
+                JOptionPane.showMessageDialog(this, "Registration Successfull!");
+            } else {
+                JOptionPane.showMessageDialog(this, "Registration Failed!");
+            }
+
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Database Error: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     public static void main(String[] args) {

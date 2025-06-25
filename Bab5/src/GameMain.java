@@ -376,7 +376,8 @@ public class GameMain extends JPanel {
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 JFrame frame = new JFrame(TITLE);
-                frame.setContentPane(new StartScreen());
+//                frame.setContentPane(new StartScreen());
+                frame.setContentPane(new LoginScreen(frame));
                 frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 frame.pack();
                 frame.setLocationRelativeTo(null);
