@@ -2,6 +2,7 @@ package Bab5.src;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.sql.SQLException;
 import java.util.Random;
 import javax.swing.*;
 
@@ -332,7 +333,7 @@ public class GameMain extends JPanel {
         // Cek jika ada pemenang match (Best of 3)
         if (crossWins == ROUNDS_TO_WIN || noughtWins == ROUNDS_TO_WIN) { // Jika skor salah satu antara x atau o sudah 2 maka dapat di runAdd commentMore actions
             String champ = (crossWins == ROUNDS_TO_WIN) ? playerXName : playerOName;
-            JOptionPane.showMessageDialog(this, champ + " Won! " +
+            JOptionPane.showMessageDialog(this, Player.getUsername() + " Won! " +
                             "Final Score: " + playerXName + " " + crossWins + " – " + noughtWins + " " + playerOName, "Match Finished",
                     JOptionPane.INFORMATION_MESSAGE); // Menampilkan skor final dab pemenangnya
             int option = JOptionPane.showOptionDialog(this, "Game over! \n Do you want to play again?", "Play Again?",
@@ -348,6 +349,16 @@ public class GameMain extends JPanel {
             }
         } else if (playerWIns == ROUNDS_TO_WIN || botWin == ROUNDS_TO_WIN) {
                 String champ = (playerWIns == ROUNDS_TO_WIN) ? playerXName : playerOName;
+
+            try {
+                if (champ.equals(Player.getUsername())) {
+                    System.out.println("update");
+                    Player.updateScore(Player.getUsername());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
                 JOptionPane.showMessageDialog(this, "Final Score: " + playerXName + " " + playerWIns + " – " + botWin + " " + playerOName, "Match Finished",
                         JOptionPane.INFORMATION_MESSAGE);
 

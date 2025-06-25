@@ -5,6 +5,7 @@ import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.*;
+import java.sql.SQLException;
 
 public class StartScreen extends JFrame {
 
@@ -67,7 +68,7 @@ public class StartScreen extends JFrame {
         // Menambahkan fungsi saat tombol Player vs Bot diklik
         pvbButton.addActionListener(e -> {
             // Meminta input nama untuk pemain
-            String nameX = JOptionPane.showInputDialog(this, "Enter name for Player:", "Your Name");
+            String nameX = Player.getUsername();
             if (nameX == null || nameX.trim().isEmpty()) nameX = "Player"; // Nama default jika input kosong
 
             // Menetapkan "Bot" sebagai nama pemain kedua
@@ -79,8 +80,20 @@ public class StartScreen extends JFrame {
 
         // Menambahkan fungsi saat tombol Leaderboard diklik
         leaderboardButton.addActionListener(e -> {
-            // Menampilkan pesan bahwa fitur belum tersedia
-            JOptionPane.showMessageDialog(this, "Fitur Leaderboard akan segera hadir!", "Coming Soon", JOptionPane.INFORMATION_MESSAGE);
+                javax.swing.SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        JFrame frame = new JFrame("Register");
+                        frame.setContentPane(new LeaderboardScreen());
+                        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                        frame.pack();
+                        frame.setLocationRelativeTo(null);
+                        frame.setVisible(true);
+                    }
+                });
+                Window window = SwingUtilities.getWindowAncestor((Component) e.getSource());
+                if (window != null) {
+                    window.dispose();
+                }
         });
 
         // Panel untuk menampung dan menata tombol-tombol

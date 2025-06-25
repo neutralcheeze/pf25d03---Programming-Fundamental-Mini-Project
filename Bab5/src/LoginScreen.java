@@ -144,6 +144,8 @@ public class LoginScreen extends JPanel {
             if (success) {
                 JOptionPane.showMessageDialog(null, "Login Successfull!");
 
+                Player.setUsername(username);
+
                 javax.swing.SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
                         JFrame frame = new JFrame("MENU");
