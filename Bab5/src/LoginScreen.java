@@ -4,8 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.sql.SQLException;
 
-public class RegisterScreen extends JPanel {
-
+public class LoginScreen extends JPanel {
     private static final Color BG_COLOR = new Color(45, 52, 54);
     private static final Color BTN_COLOR = new Color(99, 110, 114);
     private static final Color PRIMARY_TEXT_COLOR = new Color(223, 230, 233);
@@ -25,7 +24,7 @@ public class RegisterScreen extends JPanel {
     JPasswordField confirmPasswordField = new JPasswordField();
 
 
-    public RegisterScreen(JFrame frame) {
+    public LoginScreen(JFrame frame) {
         setBackground(BG_COLOR);
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBorder(BorderFactory.createEmptyBorder(30, 60, 30, 60));
@@ -38,10 +37,8 @@ public class RegisterScreen extends JPanel {
         usernameField.setMaximumSize(new Dimension(200, 30));
         passwordField.setPreferredSize(new Dimension(200, 30));
         passwordField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
-        confirmPasswordField.setPreferredSize(new Dimension(200, 30));
-        confirmPasswordField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
 
-        JLabel titleLabel = new JLabel("Register", SwingConstants.CENTER);
+        JLabel titleLabel = new JLabel("Login", SwingConstants.CENTER);
         titleLabel.setFont(TITLE_FONT);
         titleLabel.setForeground(PRIMARY_TEXT_COLOR);
         add(titleLabel, BorderLayout.NORTH);
@@ -72,55 +69,48 @@ public class RegisterScreen extends JPanel {
         add(pswPanel);
         add(Box.createVerticalStrut(20));
 
-        JLabel confirmPasswordLabel = new JLabel("Confirm Password:");
-        confirmPasswordLabel.setForeground(PRIMARY_TEXT_COLOR);
-        confirmPasswordLabel.setFont(LABEL_FONT);
-
-        JPanel confirmPswPanel = new JPanel(new BorderLayout());
-        confirmPswPanel.setBackground(BG_COLOR);
-        confirmPswPanel.add(confirmPasswordLabel, BorderLayout.NORTH);
-        confirmPswPanel.add(confirmPasswordField, BorderLayout.CENTER);
-        confirmPswPanel.setAlignmentX(LEFT_ALIGNMENT);
-        add(confirmPswPanel);
-        add(Box.createVerticalStrut(20));
-
-        JButton registerBtn = new JButton("Register");
-        registerBtn.setBackground(BTN_COLOR);
-        registerBtn.setForeground(PRIMARY_TEXT_COLOR);
-        registerBtn.setFont(BTN_FONT);
-        registerBtn.setFocusPainted(false);
-        registerBtn.setAlignmentX(LEFT_ALIGNMENT);
-        add(registerBtn);
+        JButton loginBtn = new JButton("Login");
+        loginBtn.setBackground(BTN_COLOR);
+        loginBtn.setForeground(PRIMARY_TEXT_COLOR);
+        loginBtn.setFont(BTN_FONT);
+        loginBtn.setFocusPainted(false);
+        loginBtn.setAlignmentX(LEFT_ALIGNMENT);
+        add(loginBtn);
         add(Box.createVerticalStrut(10));
 
+        loginBtn.addActionListener(e -> {
+            String username = usernameField.getText();
+            String password = new String(passwordField.getPassword());
 
-        registerBtn.addActionListener(e -> {
-           String username = usernameField.getText();
-           String password = new String(passwordField.getPassword());
-           String confirmation_password = new String(confirmPasswordField.getPassword());
-
-           handleRegister(username, password, confirmation_password);
+            handleLogin(username, password);
         });
 
-        JLabel footerLabel = new JLabel("Already have an account?");
+
+        loginBtn.addActionListener(e -> {
+            String username = usernameField.getText();
+            String password = new String(passwordField.getPassword());
+
+        });
+
+        JLabel footerLabel = new JLabel("Don't have an account?");
         footerLabel.setFont(LABEL_FONT);
         footerLabel.setForeground(PRIMARY_TEXT_COLOR);
         add(footerLabel);
         add(Box.createVerticalStrut(10));
 
-        JButton loginButton = new JButton("Login Here");
-        loginButton.setBackground(BG_COLOR);
-        loginButton.setFont(LABEL_FONT);
-        loginButton.setForeground(new Color(138, 189, 248));
-        loginButton.setMargin(new Insets(0, 0, 0, 0));
-        loginButton.setBorderPainted(false);
-        loginButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        JButton registerButton = new JButton("Register Here");
+        registerButton.setBackground(BG_COLOR);
+        registerButton.setFont(LABEL_FONT);
+        registerButton.setForeground(new Color(138, 189, 248));
+        registerButton.setMargin(new Insets(0, 0, 0, 0));
+        registerButton.setBorderPainted(false);
+        registerButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        loginButton.addActionListener(e -> {
+        registerButton.addActionListener(e -> {
             javax.swing.SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
-                    JFrame frame = new JFrame("Login");
-                    frame.setContentPane(new LoginScreen(frame));
+                    JFrame frame = new JFrame("Register");
+                    frame.setContentPane(new RegisterScreen(frame));
                     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                     frame.pack();
                     frame.setLocationRelativeTo(null);
@@ -135,47 +125,52 @@ public class RegisterScreen extends JPanel {
         JPanel footerPanel = new JPanel();
         footerPanel.setBackground(BG_COLOR);
         footerPanel.add(footerLabel, BorderLayout.CENTER);
-        footerPanel.add(loginButton, BorderLayout.CENTER);
+        footerPanel.add(registerButton, BorderLayout.CENTER);
         footerPanel.setAlignmentX(LEFT_ALIGNMENT);
         add(footerPanel);
     }
 
-    void handleRegister(String username, String password, String confirmation_password) {
-        if (username.isEmpty() || password.isEmpty() || confirmation_password.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please input all fields.");
-            return;
-        }
 
-        if (!password.equals(confirmation_password)) {
-            JOptionPane.showMessageDialog(this, "Password confirmation does not match");
+    void handleLogin(String username, String password) {
+        if (username.isEmpty() || password.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please input all fields.");
             return;
         }
 
         try {
             Authentication auth = new Authentication();
-            if (auth.isUsernameFound(username)) {
-                JOptionPane.showMessageDialog(this, "Username already taken");
-                return;
-            }
+            boolean success = auth.login(username, password);
 
-           boolean success = auth.register(username, password, confirmation_password);
             if (success) {
-                JOptionPane.showMessageDialog(this, "Registration Successfull!");
-            } else {
-                JOptionPane.showMessageDialog(this, "Registration Failed!");
-            }
+                JOptionPane.showMessageDialog(null, "Login Successfull!");
 
+                javax.swing.SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        JFrame frame = new JFrame("MENU");
+                        frame.setContentPane(new StartScreen());
+                        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                        frame.pack();
+                        frame.setLocationRelativeTo(null);
+                        frame.setVisible(true);
+                    }
+                });
+
+                SwingUtilities.getWindowAncestor(this).dispose();
+            } else {
+                JOptionPane.showMessageDialog(null, "Username or password is invalid!");
+            }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(this, "Database Error: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     public static void main(String[] args) {
-        JFrame frame  = new JFrame("Register");
+        JFrame frame  = new JFrame("Login");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setContentPane(new RegisterScreen(frame));
+        frame.setContentPane(new LoginScreen(frame));
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
+
 }
